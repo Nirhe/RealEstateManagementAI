@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using RealEstateManagement.API.Data;
 
 Console.WriteLine("Starting Real Estate Management API...");
 try
@@ -20,7 +22,11 @@ try
                 .AllowAnyMethod()
                 .AllowAnyHeader());
     });
-    
+
+    // Register Entity Framework context using configured connection string
+    builder.Services.AddDbContext<RealEstateContext>(options =>
+        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
     builder.Services.AddControllers();
 
     // Add Swagger/OpenAPI generation for API exploration.
