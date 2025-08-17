@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using RealEstateManagement.API.Data;
 using RealEstateManagement.API.Models;
 
 namespace RealEstateManagement.API.Controllers;
@@ -11,14 +13,23 @@ namespace RealEstateManagement.API.Controllers;
 [Route("api/[controller]")]
 public class TenantController : ControllerBase
 {
+    private readonly RealEstateContext _context;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TenantController"/> class.
+    /// </summary>
+    public TenantController(RealEstateContext context)
+    {
+        _context = context;
+    }
+
     /// <summary>
     /// Retrieve all tenants.
     /// </summary>
     [HttpGet]
-    public ActionResult<IEnumerable<Tenant>> GetAll()
+    public async Task<ActionResult<IEnumerable<Tenant>>> GetAll()
     {
-        // TODO: replace with data access logic
-        var tenants = new List<Tenant>();
+        var tenants = await _context.Tenants.ToListAsync();
         return Ok(tenants);
     }
 
@@ -26,10 +37,10 @@ public class TenantController : ControllerBase
     /// Add a new tenant record.
     /// </summary>
     [HttpPost]
-    public ActionResult<Tenant> Create([FromBody] Tenant tenant)
+    public async Task<ActionResult<Tenant>> Create([FromBody] Tenant tenant)
     {
-        // TODO: persist tenant
-        tenant.Id = 1; // placeholder ID assignment
+        _context.Tenants.Add(tenant);
+        await _context.SaveChangesAsync();
         return CreatedAtAction(nameof(GetAll), new { id = tenant.Id }, tenant);
     }
 }
