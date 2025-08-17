@@ -12,9 +12,8 @@ namespace RealEstateManagement.API.Controllers;
 public class MarketAnalysisController : ControllerBase
 {
     /// <summary>
-    /// Calculate a simple cap rate and cash‑on‑cash return for a property.  Supply the
-    /// purchase price and expected monthly rent.  All values are placeholders and do not
-    /// constitute financial advice.
+    /// Calculate a simple cap rate for a property.  Supply the purchase price and expected
+    /// monthly rent.  All values are placeholders and do not constitute financial advice.
     /// </summary>
     /// <param name="purchasePrice">Purchase price of the property.</param>
     /// <param name="monthlyRent">Expected monthly rent.</param>
