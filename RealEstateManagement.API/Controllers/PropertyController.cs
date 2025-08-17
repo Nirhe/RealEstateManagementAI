@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using RealEstateManagement.API.Data;
 using RealEstateManagement.API.Models;
-using System.Linq;
 
 namespace RealEstateManagement.API.Controllers;
 
@@ -11,17 +12,24 @@ namespace RealEstateManagement.API.Controllers;
 [Route("api/[controller]")]
 public class PropertyController : ControllerBase
 {
-    // In-memory store for demo purposes
-    private static readonly List<Property> _properties = new();
-    private static int _nextId = 1;
+    private readonly RealEstateContext _context;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PropertyController"/> class.
+    /// </summary>
+    public PropertyController(RealEstateContext context)
+    {
+        _context = context;
+    }
 
     /// <summary>
     /// Retrieve all properties in the portfolio.
     /// </summary>
     [HttpGet]
-    public ActionResult<IEnumerable<Property>> GetAll()
+    public async Task<ActionResult<IEnumerable<Property>>> GetAll()
     {
-        return Ok(_properties);
+        var properties = await _context.Properties.ToListAsync();
+        return Ok(properties);
     }
 
     /// <summary>
@@ -29,9 +37,9 @@ public class PropertyController : ControllerBase
     /// </summary>
     /// <param name="id">The id of the property to retrieve.</param>
     [HttpGet("{id}")]
-    public ActionResult<Property> GetById(int id)
+    public async Task<ActionResult<Property>> GetById(int id)
     {
-        var property = _properties.FirstOrDefault(p => p.Id == id);
+        var property = await _context.Properties.FindAsync(id);
         if (property == null)
         {
             return NotFound();
@@ -44,7 +52,7 @@ public class PropertyController : ControllerBase
     /// Add a new property to the portfolio.
     /// </summary>
     [HttpPost]
-    public ActionResult<Property> Create([FromBody] Property property)
+    public async Task<ActionResult<Property>> Create([FromBody] Property property)
     {
         if (property == null)
         {
@@ -57,9 +65,8 @@ public class PropertyController : ControllerBase
             return BadRequest("Address is required");
         }
 
-        // Assign a new ID and add to the list
-        property.Id = _nextId++;
-        _properties.Add(property);
+        _context.Properties.Add(property);
+        await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetById), new { id = property.Id }, property);
     }
