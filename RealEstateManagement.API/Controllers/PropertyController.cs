@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using RealEstateManagement.API.Models;
+using System.Linq;
 
 namespace RealEstateManagement.API.Controllers;
 
@@ -24,6 +25,22 @@ public class PropertyController : ControllerBase
     }
 
     /// <summary>
+    /// Retrieve a property by its unique identifier.
+    /// </summary>
+    /// <param name="id">The id of the property to retrieve.</param>
+    [HttpGet("{id}")]
+    public ActionResult<Property> GetById(int id)
+    {
+        var property = _properties.FirstOrDefault(p => p.Id == id);
+        if (property == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(property);
+    }
+
+    /// <summary>
     /// Add a new property to the portfolio.
     /// </summary>
     [HttpPost]
@@ -44,6 +61,6 @@ public class PropertyController : ControllerBase
         property.Id = _nextId++;
         _properties.Add(property);
 
-        return CreatedAtAction(nameof(GetAll), new { id = property.Id }, property);
+        return CreatedAtAction(nameof(GetById), new { id = property.Id }, property);
     }
 }
