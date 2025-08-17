@@ -25,6 +25,10 @@ public class MarketAnalysisController : ControllerBase
         {
             return BadRequest("Purchase price must be greater than zero.");
         }
+        if (monthlyRent < 0)
+        {
+            return BadRequest("Monthly rent must be non-negative.");
+        }
         // Simple cap rate = (annual rent) / purchase price
         var annualRent = monthlyRent * 12;
         var capRate = purchasePrice == 0 ? 0 : annualRent / purchasePrice;
