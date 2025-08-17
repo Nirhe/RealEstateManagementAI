@@ -12,6 +12,15 @@ try
 
     Console.WriteLine("Configuring services...");
     // Add services to the container.
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowAll",
+            builder => builder
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader());
+    });
+    
     builder.Services.AddControllers();
 
     // Add Swagger/OpenAPI generation for API exploration.
@@ -28,11 +37,18 @@ try
 
     Console.WriteLine("Building application...");
     
-    // Configure Kestrel to use a different port
+    // Configure Kestrel to use specific ports
     builder.WebHost.ConfigureKestrel(serverOptions =>
     {
-        serverOptions.ListenLocalhost(5001); // Using port 5001 instead of default 5000
+        serverOptions.ListenLocalhost(5002); // HTTP
+        serverOptions.ListenLocalhost(5003, listenOptions =>
+        {
+            listenOptions.UseHttps();
+        });
     });
+    
+    // Ensure we're not using the default ports
+    builder.WebHost.UseUrls("http://localhost:5002;https://localhost:5003");
     
     var app = builder.Build();
 
@@ -46,6 +62,9 @@ try
         {
             c.SwaggerEndpoint("/swagger/v1/swagger.json", "Real Estate Management API v1");
         });
+        
+        // Enable CORS for development
+        app.UseCors("AllowAll");
     }
     else
     {
